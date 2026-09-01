@@ -1,0 +1,21 @@
+{
+  "name": "microservicio-usuarios",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API de autenticacion y usuarios para RaspberryPros",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.13.1"
+  }
+}

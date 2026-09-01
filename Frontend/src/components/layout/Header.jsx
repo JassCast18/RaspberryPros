@@ -1,4 +1,21 @@
+import useAuth from '../../context/useAuth.js'
+
+function getInitials(value) {
+  return value
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+}
+
 function Header({ isNavigationOpen, onMenuToggle }) {
+  const { user } = useAuth()
+  const displayName = user?.name || user?.email || ''
+  const roleLabel = Array.isArray(user?.roles) ? user.roles.join(', ') : ''
+  const secondaryText = roleLabel || user?.email || ''
+
   return (
     <header className="app-header">
       <div className="app-header__identity">
@@ -29,14 +46,14 @@ function Header({ isNavigationOpen, onMenuToggle }) {
 
       <div
         className="user-summary"
-        aria-label="Usuario de demostración, rol Administrador"
+        aria-label={`${displayName}${secondaryText ? `, ${secondaryText}` : ''}`}
       >
         <span className="user-summary__avatar" aria-hidden="true">
-          UD
+          {getInitials(displayName)}
         </span>
         <span className="user-summary__details">
-          <strong>Usuario demo</strong>
-          <small>Administrador</small>
+          <strong>{displayName}</strong>
+          {secondaryText && <small>{secondaryText}</small>}
         </span>
       </div>
     </header>

@@ -173,29 +173,20 @@
   color: #aeb8ca;
   background: transparent;
   text-align: left;
+  cursor: pointer;
+  transition: color 160ms ease, background-color 160ms ease;
 }
 
-.sidebar__logout:disabled {
-  opacity: 1;
-  cursor: not-allowed;
-}
-
-.sidebar__logout span,
-.sidebar__logout small {
-  display: block;
-  color: inherit;
+.sidebar__logout:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .sidebar__logout span {
+  display: block;
+  color: inherit;
   font-size: 0.84rem;
   font-weight: 600;
-}
-
-.sidebar__logout small {
-  margin-top: 1px;
-  color: #7f8ca4;
-  font-size: 0.65rem;
-  font-weight: 500;
 }
 
 .app-header {
@@ -276,13 +267,21 @@
 }
 
 .user-summary__details strong {
+  max-width: 180px;
+  overflow: hidden;
   font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-summary__details small {
+  max-width: 180px;
   margin-top: 1px;
+  overflow: hidden;
   color: var(--color-muted);
   font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-main {
@@ -362,7 +361,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sidebar,
-  .sidebar__link {
+  .sidebar__link,
+  .sidebar__logout {
     transition: none;
   }
 }

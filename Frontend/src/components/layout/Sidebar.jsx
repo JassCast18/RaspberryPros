@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
+import useAuth from '../../context/useAuth.js'
 
 const navigationItems = [
   { to: '/', label: 'Inicio', icon: 'home', end: true },
@@ -23,6 +24,15 @@ function NavigationIcon({ name }) {
 }
 
 function Sidebar({ isOpen, onClose }) {
+  const { logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    onClose()
+    navigate('/login', { replace: true })
+  }
+
   return (
     <aside
       className={`sidebar${isOpen ? ' sidebar--open' : ''}`}
@@ -71,16 +81,12 @@ function Sidebar({ isOpen, onClose }) {
         <button
           className="sidebar__logout"
           type="button"
-          title="Disponible cuando se implemente la autenticación"
-          disabled
+          onClick={handleLogout}
         >
           <svg className="navigation-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h5m5-4 4-4-4-4m4 4H9" />
           </svg>
-          <span>
-            Cerrar sesión
-            <small>Próximamente</small>
-          </span>
+          <span>Cerrar sesión</span>
         </button>
       </div>
     </aside>

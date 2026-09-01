@@ -268,30 +268,115 @@
   font-size: 0.87rem;
 }
 
-.primary-link {
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  text-align: left;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-field label {
+  color: #344054;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.form-field input {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid #cfd6e1;
+  border-radius: 10px;
+  color: var(--color-text);
+  background: #ffffff;
+  font-size: 0.88rem;
+}
+
+.form-field input:hover:not(:disabled) {
+  border-color: #aeb8c7;
+}
+
+.form-field input:focus {
+  border-color: var(--color-primary);
+}
+
+.form-field input:disabled {
+  color: #8992a3;
+  background: #f2f4f7;
+  cursor: not-allowed;
+}
+
+.login-error {
+  margin: -2px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #f1b8c9;
+  border-radius: 9px;
+  color: #7c1737;
+  background: #fff1f5;
+  font-size: 0.76rem;
+}
+
+.login-submit {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   min-height: 46px;
+  margin-top: 3px;
   padding: 10px 18px;
   border-radius: 10px;
   color: #ffffff;
   background: var(--color-primary);
   font-size: 0.84rem;
   font-weight: 700;
-  text-decoration: none;
+  cursor: pointer;
 }
 
-.primary-link:hover {
+.login-submit:hover:not(:disabled) {
   background: var(--color-primary-dark);
 }
 
-.login-card__note {
-  display: block;
-  margin-top: 16px;
-  color: #8992a3;
-  font-size: 0.67rem;
+.login-submit:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.auth-loading-screen {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  color: var(--color-muted);
+  background: var(--color-background);
+}
+
+.auth-loading-screen p {
+  margin: 0;
+  color: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.auth-loading-screen__spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #dce1e9;
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: auth-spin 700ms linear infinite;
+}
+
+@keyframes auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 900px) {
@@ -326,5 +411,11 @@
 
   .stat-card:last-child {
     grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-loading-screen__spinner {
+    animation: none;
   }
 }

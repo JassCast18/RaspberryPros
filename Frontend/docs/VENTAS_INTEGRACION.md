@@ -16,6 +16,22 @@ Las ventas registradas se almacenan temporalmente dentro de
 `localStorage` ni en otra persistencia. Registrar una venta tampoco descuenta el stock del
 catálogo global; el stock solo limita las cantidades del detalle que se está preparando.
 
+## Historial provisional
+
+La ruta `/ventas/historial` consulta el mismo almacenamiento en memoria de
+`src/services/salesService.js` mediante `getSales()` y `getSaleById()`. No existe una
+colección separada para el historial: una venta registrada desde `/ventas` queda disponible
+inmediatamente para ambas consultas durante la misma ejecución de la SPA.
+
+El historial comienza vacío y no agrega ventas ficticias para completar la interfaz. No
+utiliza `localStorage`, `sessionStorage` ni otra persistencia, por lo que una recarga completa
+elimina las ventas registradas. El listado, la búsqueda y el detalle operan exclusivamente
+sobre el modelo provisional descrito en este documento.
+
+Cuando exista el Microservicio Ventas, `getSales()` y `getSaleById()` deberán sustituirse por
+las consultas del contrato real, incluyendo sus reglas de autenticación, paginación,
+filtrado y errores.
+
 ## Modelo provisional
 
 La forma local actual de una venta es:
@@ -71,7 +87,7 @@ precios desde la fuente real. La autoridad final sobre precio, stock, totales y 
 debe permanecer en el backend; las validaciones del navegador solo deben servir como ayuda
 inmediata para la persona usuaria.
 
-`SalesPage` podrá conservar la selección, el detalle, los estados de carga, los mensajes y el
-diseño responsive siempre que se adapten los nombres y reglas que establezca el contrato.
-El historial de ventas no forma parte de FRONT-05A y deberá implementarse cuando exista el
-endpoint real de listado.
+`SalesPage` y `SalesHistoryPage` podrán conservar sus flujos visuales, estados de carga,
+mensajes y diseño responsive siempre que se adapten los nombres y reglas que establezca el
+contrato. El historial deberá consumir el endpoint real de listado y detalle en lugar de la
+colección temporal.

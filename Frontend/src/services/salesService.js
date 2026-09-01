@@ -78,4 +78,15 @@ async function registerSale({ usuario = null, items }) {
   return cloneSale(sale)
 }
 
-export { registerSale }
+async function getSales() {
+  await waitForMockOperation()
+  return mockSalesStore.map(cloneSale)
+}
+
+async function getSaleById(saleId) {
+  await waitForMockOperation()
+  const sale = mockSalesStore.find(({ id }) => String(id) === String(saleId))
+  return sale ? cloneSale(sale) : null
+}
+
+export { getSaleById, getSales, registerSale }

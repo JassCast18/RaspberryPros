@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import BrandLogo from '../components/common/BrandLogo.jsx'
 import useAuth from '../context/useAuth.js'
 import { AuthServiceError } from '../services/authService.js'
 
@@ -49,9 +50,7 @@ function LoginPage() {
   return (
     <main className="login-page">
       <section className="login-card" aria-labelledby="login-title">
-        <div className="login-card__brand" aria-hidden="true">
-          RP
-        </div>
+        <BrandLogo className="login-card__brand" />
         <p className="login-card__system">RaspberryPros</p>
         <h1 id="login-title">Iniciar sesión</h1>
         <p className="login-card__description">

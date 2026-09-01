@@ -48,17 +48,11 @@
 }
 
 .sidebar__logo {
-  display: grid;
+  display: block;
   flex: 0 0 auto;
-  place-items: center;
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  color: #ffffff;
-  background: var(--color-primary);
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
 }
 
 .sidebar__brand strong,
@@ -208,6 +202,14 @@
   gap: 12px;
 }
 
+.app-header__logo {
+  display: none;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+
 .app-header__label,
 .app-header__name {
   margin: 0;
@@ -319,6 +321,10 @@
     display: block;
   }
 
+  .app-header__logo {
+    display: block;
+  }
+
   .sidebar-backdrop {
     position: fixed;
     inset: 0;
@@ -341,6 +347,10 @@
 }
 
 @media (max-width: 520px) {
+  .app-header__identity {
+    gap: 9px;
+  }
+
   .app-header__label {
     display: none;
   }

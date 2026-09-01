@@ -82,18 +82,12 @@
 }
 
 .welcome-panel__mark {
-  display: grid;
+  display: block;
   flex: 0 0 auto;
-  place-items: center;
   width: 84px;
   height: 84px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 22px;
-  color: #ffffff;
-  background: var(--color-primary);
-  font-size: 1.2rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
 }
 
 .section-heading {
@@ -234,17 +228,11 @@
 }
 
 .login-card__brand {
-  display: grid;
+  display: block;
   width: 58px;
   height: 58px;
   margin: 0 auto;
   border-radius: 15px;
-  place-items: center;
-  color: #ffffff;
-  background: var(--color-primary);
-  font-size: 0.9rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
 }
 
 .login-card__system {

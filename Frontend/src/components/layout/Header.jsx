@@ -1,3 +1,4 @@
+import BrandLogo from '../common/BrandLogo.jsx'
 import useAuth from '../../context/useAuth.js'
 
 function getInitials(value) {
@@ -37,6 +38,8 @@ function Header({ isNavigationOpen, onMenuToggle }) {
             </svg>
           )}
         </button>
+
+        <BrandLogo className="app-header__logo" />
 
         <div>
           <p className="app-header__label">Sistema de ventas</p>

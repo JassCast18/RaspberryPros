@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import BrandLogo from '../components/common/BrandLogo.jsx'
 import PageHeader from '../components/common/PageHeader.jsx'
 import StatCard from '../components/common/StatCard.jsx'
 import { getProducts } from '../services/productService.js'
@@ -124,9 +125,7 @@ function HomePage() {
             ventas y consultar el historial de operaciones.
           </p>
         </div>
-        <div className="welcome-panel__mark" aria-hidden="true">
-          RP
-        </div>
+        <BrandLogo className="welcome-panel__mark" />
       </section>
 
       <section aria-labelledby="summary-title">

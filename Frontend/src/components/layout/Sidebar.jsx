@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
+import BrandLogo from '../common/BrandLogo.jsx'
 import useAuth from '../../context/useAuth.js'
 
 const navigationItems = [
@@ -40,9 +41,7 @@ function Sidebar({ isOpen, onClose }) {
       aria-label="Navegación principal"
     >
       <div className="sidebar__brand">
-        <span className="sidebar__logo" aria-hidden="true">
-          RP
-        </span>
+        <BrandLogo className="sidebar__logo" />
         <div>
           <strong>RaspberryPros</strong>
           <span>Control de ventas</span>

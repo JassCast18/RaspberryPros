@@ -16,6 +16,11 @@ async function getProducts() {
   return mockProductStore.map(cloneProduct)
 }
 
+async function getAvailableProducts() {
+  const products = await getProducts()
+  return products.filter(({ activo, stock }) => activo && Number(stock) > 0)
+}
+
 async function createProduct(product) {
   await waitForMockOperation()
 
@@ -40,4 +45,4 @@ async function updateProduct(productId, changes) {
   return cloneProduct(updatedProduct)
 }
 
-export { createProduct, getProducts, updateProduct }
+export { createProduct, getAvailableProducts, getProducts, updateProduct }

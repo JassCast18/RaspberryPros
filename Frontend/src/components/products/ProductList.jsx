@@ -1,9 +1,4 @@
-const currencyFormatter = new Intl.NumberFormat('es-GT', {
-  style: 'currency',
-  currency: 'GTQ',
-  currencyDisplay: 'narrowSymbol',
-  minimumFractionDigits: 2,
-})
+import formatCurrency from '../../utils/formatCurrency.js'
 
 function getStockStatus(stock) {
   if (stock === 0) {
@@ -48,7 +43,7 @@ function ProductList({ products, isAdmin, onEdit }) {
                   <span className="category-badge">{product.categoria}</span>
                 </td>
                 <td data-label="Precio" className="product-price">
-                  {currencyFormatter.format(product.precio)}
+                  {formatCurrency(product.precio)}
                 </td>
                 <td data-label="Stock">
                   <div className="stock-cell">

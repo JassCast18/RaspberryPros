@@ -90,7 +90,7 @@ function SalesHistoryPage() {
         description="Revisa las ventas registradas durante la ejecución actual de la aplicación."
       />
 
-      <aside className="sales-mock-notice" aria-label="Información sobre el historial">
+      <aside className="mock-notice" aria-label="Información sobre el historial">
         <span aria-hidden="true">M</span>
         <p>
           <strong>Historial de demostración.</strong> Utiliza el mismo almacenamiento en

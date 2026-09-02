@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import BrandLogo from '../common/BrandLogo.jsx'
 import useAuth from '../../context/useAuth.js'
@@ -24,9 +25,33 @@ function NavigationIcon({ name }) {
   )
 }
 
-function Sidebar({ isOpen, onClose }) {
+function Sidebar({ isOpen, onClose, onNavigate }) {
   const { logout } = useAuth()
   const navigate = useNavigate()
+  const closeButtonRef = useRef(null)
+
+  useEffect(() => {
+    if (isOpen) closeButtonRef.current?.focus()
+  }, [isOpen])
+
+  const handleKeyDown = (event) => {
+    if (!isOpen || event.key !== 'Tab') return
+
+    const sidebar = event.currentTarget
+    const focusableElements = sidebar.querySelectorAll(
+      'a[href], button:not([disabled])',
+    )
+    const firstElement = focusableElements[0]
+    const lastElement = focusableElements[focusableElements.length - 1]
+
+    if (event.shiftKey && document.activeElement === firstElement) {
+      event.preventDefault()
+      lastElement?.focus()
+    } else if (!event.shiftKey && document.activeElement === lastElement) {
+      event.preventDefault()
+      firstElement?.focus()
+    }
+  }
 
   const handleLogout = () => {
     logout()
@@ -39,6 +64,7 @@ function Sidebar({ isOpen, onClose }) {
       className={`sidebar${isOpen ? ' sidebar--open' : ''}`}
       id="primary-navigation"
       aria-label="Navegación principal"
+      onKeyDown={handleKeyDown}
     >
       <div className="sidebar__brand">
         <BrandLogo className="sidebar__logo" />
@@ -47,6 +73,7 @@ function Sidebar({ isOpen, onClose }) {
           <span>Control de ventas</span>
         </div>
         <button
+          ref={closeButtonRef}
           className="sidebar__close"
           type="button"
           aria-label="Cerrar navegación"
@@ -68,7 +95,7 @@ function Sidebar({ isOpen, onClose }) {
             }
             end={end}
             to={to}
-            onClick={onClose}
+            onClick={onNavigate}
           >
             <NavigationIcon name={icon} />
             <span>{label}</span>

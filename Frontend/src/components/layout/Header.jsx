@@ -11,7 +11,7 @@ function getInitials(value) {
     .toUpperCase()
 }
 
-function Header({ isNavigationOpen, onMenuToggle }) {
+function Header({ isNavigationOpen, menuButtonRef, onMenuToggle }) {
   const { user } = useAuth()
   const displayName = user?.name || user?.email || ''
   const roleLabel = Array.isArray(user?.roles) ? user.roles.join(', ') : ''
@@ -21,6 +21,7 @@ function Header({ isNavigationOpen, onMenuToggle }) {
     <header className="app-header">
       <div className="app-header__identity">
         <button
+          ref={menuButtonRef}
           className="menu-button"
           type="button"
           aria-label={isNavigationOpen ? 'Cerrar menú' : 'Abrir menú'}

@@ -1,16 +1,41 @@
-# React + Vite
+# RaspberryPros | Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicación React + Vite para la interfaz del sistema de ventas RaspberryPros.
 
-Currently, two official plugins are available:
+## Estado actual del frontend
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Implementados: autenticación JWT, layout responsive, dashboard, productos,
+  registro de ventas e historial de ventas.
+- Productos utiliza actualmente un catálogo mock aislado en `productService`; la
+  conexión con el Microservicio Productos queda pendiente hasta disponer de su
+  contrato real.
+- Ventas e historial utilizan un almacén compartido en memoria de `salesService`;
+  no existe persistencia y la integración con el Microservicio Ventas está pendiente.
+- Auth está implementado contra el contrato actual del Microservicio Usuarios. La
+  validación E2E permanece pendiente por la configuración externa de PostgreSQL y
+  backend.
 
-## React Compiler
+## Ejecución local
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+npm run dev
+```
 
-## Expanding the ESLint configuration
+Para comprobar la compilación de producción:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm run build
+```
+
+## Variables de entorno de Auth
+
+Copia `.env.example` a un archivo `.env` local y ajusta, cuando corresponda:
+
+- `VITE_AUTH_API_URL`: URL del Microservicio Usuarios utilizada como destino del
+  proxy de Vite.
+- `VITE_AUTH_API_PROXY_PATH`: ruta local mediante la cual el navegador accede al
+  servicio en desarrollo.
+
+No se requieren variables de entorno de Productos o Ventas mientras ambos módulos
+continúen usando sus implementaciones provisionales.

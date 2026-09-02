@@ -218,7 +218,7 @@ function SalesPage() {
         description="Selecciona productos disponibles y prepara una venta provisional en quetzales."
       />
 
-      <aside className="sales-mock-notice" aria-label="Información sobre el registro">
+      <aside className="mock-notice" aria-label="Información sobre el registro">
         <span aria-hidden="true">M</span>
         <p>
           <strong>Registro de demostración.</strong> Las ventas se conservan solo durante

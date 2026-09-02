@@ -1,3 +1,17 @@
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS productos (
+    id BIGSERIAL PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    descripcion TEXT NOT NULL DEFAULT '',
+    precio NUMERIC(12,2) NOT NULL CHECK (precio >= 0),
+    stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
+    categoria VARCHAR(100) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_creacion TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    fecha_actualizacion TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 INSERT INTO productos
     (nombre, descripcion, precio, stock, categoria, activo)
 SELECT
@@ -57,3 +71,5 @@ WHERE NOT EXISTS (
     FROM productos
     WHERE nombre = 'Audífonos USB'
 );
+
+COMMIT;

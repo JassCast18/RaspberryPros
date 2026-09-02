@@ -35,12 +35,13 @@ function HomePage() {
       .then((sales) => {
         if (!isCurrent) return
 
-        const total = sales.reduce((accumulator, sale) => {
+        const activeSales = sales.filter((sale) => sale.estado !== 'anulada')
+        const total = activeSales.reduce((accumulator, sale) => {
           const saleTotal = Number(sale.total)
           return Number.isFinite(saleTotal) ? accumulator + saleTotal : accumulator
         }, 0)
 
-        setSalesMetric({ status: 'success', value: sales.length, total })
+        setSalesMetric({ status: 'success', value: activeSales.length, total })
       })
       .catch(() => {
         if (isCurrent) setSalesMetric({ status: 'error', value: 0, total: 0 })
@@ -89,10 +90,10 @@ function HomePage() {
       value: salesValue,
       detail:
         salesMetric.status === 'loading'
-          ? 'Consultando ventas de la sesión…'
+          ? 'Consultando ventas registradas…'
           : salesMetric.status === 'error'
             ? 'No fue posible consultar las ventas'
-            : `${salesMetric.value} ${salesMetric.value === 1 ? 'venta registrada' : 'ventas registradas'} en esta sesión`,
+            : `${salesMetric.value} ${salesMetric.value === 1 ? 'venta vigente' : 'ventas vigentes'} en el sistema`,
       symbol: 'VT',
     },
     {
@@ -100,10 +101,10 @@ function HomePage() {
       value: totalValue,
       detail:
         salesMetric.status === 'loading'
-          ? 'Calculando total de la sesión…'
+          ? 'Calculando ingresos registrados…'
           : salesMetric.status === 'error'
             ? 'No fue posible calcular el total vendido'
-            : 'Total acumulado durante esta sesión',
+            : 'Total acumulado de ventas vigentes',
       symbol: 'GTQ',
     },
   ]
@@ -118,7 +119,7 @@ function HomePage() {
 
       <section className="welcome-panel" aria-labelledby="welcome-title">
         <div>
-          <span className="welcome-panel__badge">Entorno demostrativo</span>
+          <span className="welcome-panel__badge">Gestión comercial</span>
           <h2 id="welcome-title">Bienvenido a RaspberryPros</h2>
           <p>
             Desde este panel podrás acceder al catálogo de productos, registrar
@@ -132,9 +133,9 @@ function HomePage() {
         <div className="section-heading">
           <div>
             <p className="section-heading__eyebrow">Actividad</p>
-            <h2 id="summary-title">Resumen de la sesión</h2>
+            <h2 id="summary-title">Resumen de operaciones</h2>
           </div>
-          <span className="demo-label">Datos de demostración</span>
+          <span className="summary-label">Datos del sistema</span>
         </div>
 
         <div className="stats-grid" aria-live="polite">

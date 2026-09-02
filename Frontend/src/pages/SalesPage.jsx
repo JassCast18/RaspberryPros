@@ -7,7 +7,7 @@ import { registerSale } from '../services/salesService.js'
 import formatCurrency from '../utils/formatCurrency.js'
 
 function SalesPage() {
-  const { user } = useAuth()
+  const { user, token } = useAuth()
   const [products, setProducts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -193,13 +193,8 @@ function SalesPage() {
 
     try {
       const sale = await registerSale({
-        usuario: user
-          ? {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-            }
-          : null,
+        user,
+        token,
         items,
       })
 
@@ -207,11 +202,12 @@ function SalesPage() {
       setItems([])
       setSelectedProductId('')
       setQuantity('1')
+      await loadProducts()
     } catch (error) {
       setRegisterError(
         error instanceof Error
           ? error.message
-          : 'No fue posible registrar la venta de demostración.',
+          : 'No fue posible registrar la venta.',
       )
     } finally {
       setIsRegistering(false)
@@ -223,16 +219,8 @@ function SalesPage() {
       <PageHeader
         eyebrow="Punto de venta"
         title="Nueva venta"
-        description="Selecciona productos disponibles y prepara una venta provisional en quetzales."
+        description="Selecciona productos disponibles y registra una venta en quetzales."
       />
-
-      <aside className="mock-notice" aria-label="Información sobre el registro">
-        <span aria-hidden="true">M</span>
-        <p>
-          <strong>Registro de demostración.</strong> Las ventas se conservan solo durante
-          esta ejecución y no se envían a ningún backend.
-        </p>
-      </aside>
 
       <div className="sale-status-region" aria-live="polite">
         {registeredSale && (
@@ -240,7 +228,7 @@ function SalesPage() {
             <div>
               <strong>Venta registrada correctamente</strong>
               <p>
-                Identificador local: <span>{registeredSale.id}</span>
+                Identificador: <span>{registeredSale.id}</span>
               </p>
             </div>
             <span>{formatCurrency(registeredSale.total)}</span>

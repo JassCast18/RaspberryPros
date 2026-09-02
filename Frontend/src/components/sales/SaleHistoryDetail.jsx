@@ -3,10 +3,21 @@ import formatCurrency from '../../utils/formatCurrency.js'
 import formatDateTime from '../../utils/formatDateTime.js'
 
 function getUserLabel(user) {
-  return user?.name || user?.email || 'No disponible'
+  return user?.name || user?.email || (user?.id ? `Usuario #${user.id}` : 'No disponible')
 }
 
-function SaleHistoryDetail({ sale, onClose }) {
+function getStatusLabel(status) {
+  return status === 'anulada' ? 'Anulada' : 'Registrada'
+}
+
+function SaleHistoryDetail({
+  sale,
+  isCancelling,
+  cancelError,
+  cancelMessage,
+  onCancel,
+  onClose,
+}) {
   const panelRef = useRef(null)
 
   useEffect(() => {
@@ -22,12 +33,29 @@ function SaleHistoryDetail({ sale, onClose }) {
     >
       <header className="history-detail-header">
         <div>
-          <p>Detalle provisional</p>
+          <p>Detalle de venta</p>
           <h2 id="sale-history-detail-title">Venta {sale.id}</h2>
         </div>
-        <button className="history-detail-close" type="button" onClick={onClose}>
-          Cerrar detalle
-        </button>
+        <div className="history-detail-actions">
+          {sale.estado !== 'anulada' && (
+            <button
+              className="history-cancel-button"
+              type="button"
+              disabled={isCancelling}
+              onClick={() => onCancel(sale)}
+            >
+              {isCancelling ? 'Anulando…' : 'Anular venta'}
+            </button>
+          )}
+          <button
+            className="history-detail-close"
+            type="button"
+            disabled={isCancelling}
+            onClick={onClose}
+          >
+            Cerrar detalle
+          </button>
+        </div>
       </header>
 
       <dl className="history-detail-metadata">
@@ -42,6 +70,18 @@ function SaleHistoryDetail({ sale, onClose }) {
         <div>
           <dt>Usuario</dt>
           <dd>{getUserLabel(sale.usuario)}</dd>
+        </div>
+        <div>
+          <dt>Estado</dt>
+          <dd>
+            <span
+              className={`sale-status-badge sale-status-badge--${
+                sale.estado === 'anulada' ? 'cancelled' : 'registered'
+              }`}
+            >
+              {getStatusLabel(sale.estado)}
+            </span>
+          </dd>
         </div>
       </dl>
 
@@ -58,7 +98,7 @@ function SaleHistoryDetail({ sale, onClose }) {
           </thead>
           <tbody>
             {sale.items.map((item) => (
-              <tr key={item.producto.id}>
+              <tr key={item.id}>
                 <td data-label="Producto">{item.producto.nombre}</td>
                 <td data-label="Cantidad">{item.cantidad}</td>
                 <td data-label="Precio unitario">{formatCurrency(item.precioUnitario)}</td>
@@ -70,6 +110,18 @@ function SaleHistoryDetail({ sale, onClose }) {
           </tbody>
         </table>
       </div>
+
+      {cancelError && (
+        <p className="history-detail-feedback history-detail-feedback--error" role="alert">
+          {cancelError}
+        </p>
+      )}
+
+      {cancelMessage && (
+        <p className="history-detail-feedback history-detail-feedback--success" role="status">
+          {cancelMessage}
+        </p>
+      )}
 
       <footer className="history-detail-total">
         <span>Total general</span>

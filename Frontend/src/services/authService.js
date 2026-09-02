@@ -14,6 +14,10 @@ class AuthServiceError extends Error {
 }
 
 function getErrorMessage(status, code) {
+  if (status === 409 && code === 'EMAIL_ALREADY_EXISTS') {
+    return 'Ya existe una cuenta registrada con este correo.'
+  }
+
   if (status === 401 && code === 'INVALID_CREDENTIALS') {
     return 'El correo o la contraseña son incorrectos.'
   }
@@ -106,6 +110,21 @@ async function login({ email, password }) {
   return data
 }
 
+async function register({ name, email, password }) {
+  const user = await request('/api/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({ name, email, password }),
+  })
+
+  if (!isUser(user)) {
+    throw new AuthServiceError('El servicio devolvió un usuario registrado no válido.', {
+      code: 'INVALID_REGISTER_RESPONSE',
+    })
+  }
+
+  return user
+}
+
 async function getUserById(userId, token) {
   const user = await request(`/api/users/${encodeURIComponent(userId)}`, { token })
 
@@ -118,4 +137,4 @@ async function getUserById(userId, token) {
   return user
 }
 
-export { AuthServiceError, getUserById, login }
+export { AuthServiceError, getUserById, login, register }

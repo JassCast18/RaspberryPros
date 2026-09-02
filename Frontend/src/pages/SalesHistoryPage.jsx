@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import PageHeader from '../components/common/PageHeader.jsx'
 import SaleHistoryDetail from '../components/sales/SaleHistoryDetail.jsx'
 import SaleHistoryList from '../components/sales/SaleHistoryList.jsx'
-import { getSaleById, getSales } from '../services/salesService.js'
+import { cancelSale, getSaleById, getSales } from '../services/salesService.js'
 
 function SalesHistoryPage() {
   const [sales, setSales] = useState([])
@@ -13,6 +13,9 @@ function SalesHistoryPage() {
   const [selectedSale, setSelectedSale] = useState(null)
   const [loadingSaleId, setLoadingSaleId] = useState('')
   const [detailError, setDetailError] = useState('')
+  const [isCancelling, setIsCancelling] = useState(false)
+  const [cancelError, setCancelError] = useState('')
+  const [cancelMessage, setCancelMessage] = useState('')
 
   const loadSales = useCallback(async () => {
     setIsLoading(true)
@@ -21,8 +24,10 @@ function SalesHistoryPage() {
     try {
       const saleList = await getSales()
       setSales(saleList)
-    } catch {
-      setLoadError('No fue posible consultar el historial provisional.')
+    } catch (error) {
+      setLoadError(
+        error instanceof Error ? error.message : 'No fue posible consultar el historial.',
+      )
     } finally {
       setIsLoading(false)
     }
@@ -35,8 +40,14 @@ function SalesHistoryPage() {
       .then((saleList) => {
         if (isCurrent) setSales(saleList)
       })
-      .catch(() => {
-        if (isCurrent) setLoadError('No fue posible consultar el historial provisional.')
+      .catch((error) => {
+        if (isCurrent) {
+          setLoadError(
+            error instanceof Error
+              ? error.message
+              : 'No fue posible consultar el historial.',
+          )
+        }
       })
       .finally(() => {
         if (isCurrent) setIsLoading(false)
@@ -52,32 +63,68 @@ function SalesHistoryPage() {
     if (!normalizedSearch) return sales
 
     return sales.filter((sale) => {
-      const userName = sale.usuario?.name || sale.usuario?.email || ''
-      return (
-        sale.id.toLocaleLowerCase('es').includes(normalizedSearch) ||
-        userName.toLocaleLowerCase('es').includes(normalizedSearch)
+      const saleId = String(sale.id).toLocaleLowerCase('es')
+      const userId = String(sale.usuario?.id ?? sale.idUsuario ?? '').toLocaleLowerCase(
+        'es',
       )
+      return saleId.includes(normalizedSearch) || userId.includes(normalizedSearch)
     })
   }, [sales, searchTerm])
 
   const handleOpenDetail = async (saleId) => {
-    setLoadingSaleId(saleId)
+    setLoadingSaleId(String(saleId))
     setDetailError('')
+    setCancelError('')
+    setCancelMessage('')
 
     try {
       const sale = await getSaleById(saleId)
-
-      if (!sale) {
-        setDetailError('La venta seleccionada ya no está disponible en esta sesión.')
-        return
-      }
-
       setSelectedSale(sale)
-    } catch {
-      setDetailError('No fue posible consultar el detalle de la venta.')
+    } catch (error) {
+      setDetailError(
+        error instanceof Error
+          ? error.message
+          : 'No fue posible consultar el detalle de la venta.',
+      )
     } finally {
       setLoadingSaleId('')
     }
+  }
+
+  const handleCancelSale = async (sale) => {
+    if (sale.estado === 'anulada' || isCancelling) return
+
+    const confirmed = window.confirm(
+      `¿Deseas anular la venta ${sale.id}? El registro permanecerá en el historial.`,
+    )
+    if (!confirmed) return
+
+    setIsCancelling(true)
+    setCancelError('')
+    setCancelMessage('')
+
+    try {
+      const updatedSale = await cancelSale(sale.id)
+      setSelectedSale(updatedSale)
+      setSales((currentSales) =>
+        currentSales.map((currentSale) =>
+          String(currentSale.id) === String(updatedSale.id) ? updatedSale : currentSale,
+        ),
+      )
+      setCancelMessage(`La venta ${updatedSale.id} fue anulada correctamente.`)
+    } catch (error) {
+      setCancelError(
+        error instanceof Error ? error.message : 'No fue posible anular la venta.',
+      )
+    } finally {
+      setIsCancelling(false)
+    }
+  }
+
+  const handleCloseDetail = () => {
+    setSelectedSale(null)
+    setCancelError('')
+    setCancelMessage('')
   }
 
   const clearSearch = () => setSearchTerm('')
@@ -87,22 +134,14 @@ function SalesHistoryPage() {
       <PageHeader
         eyebrow="Consultas"
         title="Historial de ventas"
-        description="Revisa las ventas registradas durante la ejecución actual de la aplicación."
+        description="Consulta las ventas persistidas y revisa el detalle de cada operación."
       />
-
-      <aside className="mock-notice" aria-label="Información sobre el historial">
-        <span aria-hidden="true">M</span>
-        <p>
-          <strong>Historial de demostración.</strong> Utiliza el mismo almacenamiento en
-          memoria del registro de ventas y se limpia al recargar.
-        </p>
-      </aside>
 
       <section className="history-panel" aria-labelledby="sales-history-list-title">
         <header className="history-panel__header">
           <div>
-            <p>Operaciones locales</p>
-            <h2 id="sales-history-list-title">Ventas de esta sesión</h2>
+            <p>Operaciones</p>
+            <h2 id="sales-history-list-title">Ventas registradas</h2>
           </div>
           {!isLoading && !loadError && (
             <span className="sales-card__badge">
@@ -115,7 +154,7 @@ function SalesHistoryPage() {
           <div className="history-state" aria-live="polite" aria-busy="true">
             <span className="sale-load-state__spinner" aria-hidden="true" />
             <h3>Cargando historial</h3>
-            <p>Consultando las ventas registradas en memoria…</p>
+            <p>Consultando las ventas registradas…</p>
           </div>
         )}
 
@@ -134,8 +173,8 @@ function SalesHistoryPage() {
             <span className="history-state__icon" aria-hidden="true">
               0
             </span>
-            <h3>No hay ventas registradas en esta sesión.</h3>
-            <p>Registra una venta para que aparezca en este historial provisional.</p>
+            <h3>No hay ventas registradas.</h3>
+            <p>Registra una venta para que aparezca en el historial.</p>
             <Link className="primary-button history-empty-action" to="/ventas">
               Registrar una venta
             </Link>
@@ -151,7 +190,7 @@ function SalesHistoryPage() {
                   id="sale-history-search"
                   type="search"
                   value={searchTerm}
-                  placeholder="Identificador o usuario"
+                  placeholder="ID de venta o usuario"
                   onChange={(event) => setSearchTerm(event.target.value)}
                 />
               </div>
@@ -176,7 +215,7 @@ function SalesHistoryPage() {
             ) : (
               <div className="history-state history-state--filtered">
                 <h3>Sin resultados</h3>
-                <p>No hay ventas que coincidan con el identificador o usuario ingresado.</p>
+                <p>No hay ventas que coincidan con el ID de venta o usuario ingresado.</p>
                 <button className="secondary-button" type="button" onClick={clearSearch}>
                   Limpiar búsqueda
                 </button>
@@ -187,7 +226,14 @@ function SalesHistoryPage() {
       </section>
 
       {selectedSale && (
-        <SaleHistoryDetail sale={selectedSale} onClose={() => setSelectedSale(null)} />
+        <SaleHistoryDetail
+          sale={selectedSale}
+          isCancelling={isCancelling}
+          cancelError={cancelError}
+          cancelMessage={cancelMessage}
+          onCancel={handleCancelSale}
+          onClose={handleCloseDetail}
+        />
       )}
     </div>
   )

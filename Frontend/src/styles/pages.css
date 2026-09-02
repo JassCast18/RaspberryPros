@@ -36,40 +36,6 @@
   font-size: 0.92rem;
 }
 
-.mock-notice {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-  padding: 13px 16px;
-  border: 1px solid #e4c6d1;
-  border-radius: 12px;
-  background: #fff8fa;
-}
-
-.mock-notice > span {
-  display: grid;
-  flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  place-items: center;
-  color: var(--color-primary-dark);
-  background: #f4dce5;
-  font-size: 0.68rem;
-  font-weight: 850;
-}
-
-.mock-notice p {
-  margin: 0;
-  color: #6d4351;
-  font-size: 0.75rem;
-}
-
-.mock-notice strong {
-  color: #6d213c;
-}
-
 .welcome-panel {
   display: flex;
   align-items: center;
@@ -142,7 +108,7 @@
   font-size: 1.2rem;
 }
 
-.demo-label {
+.summary-label {
   padding: 6px 10px;
   border: 1px solid var(--color-border);
   border-radius: 999px;
@@ -297,10 +263,20 @@
   border-color: var(--color-primary);
 }
 
+.form-field input[aria-invalid='true'] {
+  border-color: #c4476d;
+}
+
 .form-field input:disabled {
   color: #8992a3;
   background: #f2f4f7;
   cursor: not-allowed;
+}
+
+.form-field__error {
+  margin: 0;
+  color: #8b1d3f;
+  font-size: 0.72rem;
 }
 
 .login-error {
@@ -311,6 +287,17 @@
   color: #7c1737;
   background: #fff1f5;
   font-size: 0.76rem;
+}
+
+.login-success {
+  margin: -6px 0 20px;
+  padding: 10px 12px;
+  border: 1px solid #b8e2ce;
+  border-radius: 9px;
+  color: #165b3d;
+  background: #edf9f3;
+  font-size: 0.76rem;
+  text-align: left;
 }
 
 .login-submit {
@@ -335,6 +322,30 @@
 
 .login-submit:disabled {
   opacity: 0.7;
+  cursor: wait;
+}
+
+.auth-alternate {
+  margin: 20px 0 0;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+}
+
+.auth-alternate button {
+  padding: 2px;
+  color: var(--color-primary-dark);
+  background: transparent;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.auth-alternate button:hover:not(:disabled) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.auth-alternate button:disabled {
+  color: #8992a3;
   cursor: wait;
 }
 
@@ -402,12 +413,6 @@
 
   .stat-card:last-child {
     grid-column: auto;
-  }
-}
-
-@media (max-width: 560px) {
-  .mock-notice {
-    align-items: flex-start;
   }
 }
 

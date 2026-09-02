@@ -2,7 +2,11 @@ import formatCurrency from '../../utils/formatCurrency.js'
 import formatDateTime from '../../utils/formatDateTime.js'
 
 function getUserLabel(user) {
-  return user?.name || user?.email || 'No disponible'
+  return user?.name || user?.email || (user?.id ? `Usuario #${user.id}` : 'No disponible')
+}
+
+function getStatusLabel(status) {
+  return status === 'anulada' ? 'Anulada' : 'Registrada'
 }
 
 function getUnitCount(items) {
@@ -13,12 +17,13 @@ function SaleHistoryList({ sales, loadingSaleId, onSelect }) {
   return (
     <div className="history-table-wrap">
       <table className="history-table">
-        <caption className="visually-hidden">Ventas registradas durante esta sesión</caption>
+        <caption className="visually-hidden">Ventas registradas en el sistema</caption>
         <thead>
           <tr>
             <th scope="col">Identificador</th>
             <th scope="col">Fecha y hora</th>
             <th scope="col">Usuario</th>
+            <th scope="col">Estado</th>
             <th scope="col">Unidades</th>
             <th scope="col">Total</th>
             <th scope="col">
@@ -29,7 +34,7 @@ function SaleHistoryList({ sales, loadingSaleId, onSelect }) {
         <tbody>
           {sales.map((sale) => {
             const unitCount = getUnitCount(sale.items)
-            const isLoading = loadingSaleId === sale.id
+            const isLoading = loadingSaleId === String(sale.id)
 
             return (
               <tr key={sale.id}>
@@ -38,6 +43,15 @@ function SaleHistoryList({ sales, loadingSaleId, onSelect }) {
                 </td>
                 <td data-label="Fecha y hora">{formatDateTime(sale.fecha)}</td>
                 <td data-label="Usuario">{getUserLabel(sale.usuario)}</td>
+                <td data-label="Estado">
+                  <span
+                    className={`sale-status-badge sale-status-badge--${
+                      sale.estado === 'anulada' ? 'cancelled' : 'registered'
+                    }`}
+                  >
+                    {getStatusLabel(sale.estado)}
+                  </span>
+                </td>
                 <td data-label="Unidades">
                   {unitCount} {unitCount === 1 ? 'unidad' : 'unidades'}
                 </td>

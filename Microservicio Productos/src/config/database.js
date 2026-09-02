@@ -1,3 +1,4 @@
+import "dotenv/config";
 import pg from "pg";
 
 const { Pool } = pg;
@@ -20,7 +21,11 @@ export const probarConexion = async () => {
 
     console.log("Conexión a PostgreSQL exitosa");
   } catch (error) {
-    console.error("Error al conectar con PostgreSQL:", error.message);
+    console.error(
+      "Error al conectar con PostgreSQL:",
+      error.message
+    );
+
     throw error;
   } finally {
     if (client) {

@@ -117,7 +117,7 @@ function ProductFormModal({ product, categories, isSaving, saveError, onClose, o
       >
         <header className="product-modal__header">
           <div>
-            <p>Datos provisionales</p>
+            <p>Inventario</p>
             <h2 id="product-form-title">
               {isEditing ? 'Editar producto' : 'Nuevo producto'}
             </h2>
@@ -136,7 +136,7 @@ function ProductFormModal({ product, categories, isSaving, saveError, onClose, o
         </header>
 
         <p className="product-modal__note" id="product-form-note">
-          Los cambios se conservan únicamente durante esta ejecución.
+          Completa la información que se guardará en el catálogo de productos.
         </p>
 
         <form className="product-form" onSubmit={handleSubmit} noValidate>
@@ -251,7 +251,7 @@ function ProductFormModal({ product, categories, isSaving, saveError, onClose, o
               />
               <span>
                 Producto activo
-                <small>Estado local provisional; deberá adaptarse al backend.</small>
+                <small>Los productos inactivos no estarán disponibles para nuevas ventas.</small>
               </span>
             </label>
           </div>

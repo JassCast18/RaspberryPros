@@ -41,6 +41,20 @@ La API no debe compartir codigo ni acceso directo a la base de datos con los otr
 microservicios. Los demas servicios consumiran unicamente sus endpoints o, en una
 etapa posterior, validaran el JWT con el mismo contrato de claims.
 
+## Variables de entorno
+
+Copiar `.env.example` como `.env` y reemplazar localmente la contrasena de
+PostgreSQL y el secreto JWT de ejemplo. El archivo `.env` contiene configuracion
+local y no debe subirse al repositorio.
+
+```text
+PORT=3001
+DATABASE_URL=postgresql://postgres:tu_contrasena@localhost:5432/auth_db
+JWT_SECRET=cambia_este_secreto_en_tu_entorno
+JWT_EXPIRES_IN=1h
+BCRYPT_SALT_ROUNDS=12
+```
+
 ## Endpoints
 
 | Metodo | Ruta | Acceso | Funcion |
@@ -105,4 +119,3 @@ contener `sub` con el ID del usuario, `email`, `roles`, `iat` y `exp`.
 - Un usuario autenticado puede consultar su propio ID; `admin` puede consultar cualquiera.
 - Errores: `400` validacion, `401` falta o invalidez del token, `403` permisos,
 	`404` recurso inexistente y `409` email duplicado.
-- Variables previstas: `PORT=3001`, `DATABASE_URL`, `JWT_SECRET` y `JWT_EXPIRES_IN=1h`.

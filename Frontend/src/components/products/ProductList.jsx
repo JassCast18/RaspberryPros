@@ -12,11 +12,17 @@ function getStockStatus(stock) {
   return { label: 'Disponible', className: 'stock-badge--available' }
 }
 
-function ProductList({ products, isAdmin, onEdit }) {
+function ProductList({
+  products,
+  isAdmin,
+  deactivatingProductId,
+  onEdit,
+  onDeactivate,
+}) {
   return (
     <div className="products-table-wrap">
       <table className="products-table">
-        <caption className="visually-hidden">Listado de productos de demostración</caption>
+        <caption className="visually-hidden">Listado de productos</caption>
         <thead>
           <tr>
             <th scope="col">Producto</th>
@@ -64,14 +70,30 @@ function ProductList({ products, isAdmin, onEdit }) {
                 </td>
                 {isAdmin && (
                   <td data-label="Acciones">
-                    <button
-                      className="table-action"
-                      type="button"
-                      aria-label={`Editar ${product.nombre}`}
-                      onClick={() => onEdit(product)}
-                    >
-                      Editar
-                    </button>
+                    <div className="table-actions">
+                      <button
+                        className="table-action"
+                        type="button"
+                        aria-label={`Editar ${product.nombre}`}
+                        disabled={deactivatingProductId !== null}
+                        onClick={() => onEdit(product)}
+                      >
+                        Editar
+                      </button>
+                      {product.activo && (
+                        <button
+                          className="table-action table-action--danger"
+                          type="button"
+                          aria-label={`Desactivar producto ${product.nombre}`}
+                          disabled={deactivatingProductId !== null}
+                          onClick={() => onDeactivate(product)}
+                        >
+                          {deactivatingProductId === product.id
+                            ? 'Desactivando…'
+                            : 'Desactivar'}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 )}
               </tr>

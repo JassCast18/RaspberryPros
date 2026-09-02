@@ -28,7 +28,7 @@ Para comprobar la compilación de producción:
 npm run build
 ```
 
-## Variables de entorno de Auth
+## Variables de entorno
 
 Copia `.env.example` a un archivo `.env` local y ajusta, cuando corresponda:
 
@@ -36,6 +36,9 @@ Copia `.env.example` a un archivo `.env` local y ajusta, cuando corresponda:
   proxy de Vite.
 - `VITE_AUTH_API_PROXY_PATH`: ruta local mediante la cual el navegador accede al
   servicio en desarrollo.
+- `VITE_PRODUCTS_API_URL`: URL del Microservicio Productos.
 
-No se requieren variables de entorno de Productos o Ventas mientras ambos módulos
-continúen usando sus implementaciones provisionales.
+El archivo `.env` contiene la configuración local, no debe subirse al repositorio
+y no debe incluir secretos destinados a servicios del lado del servidor. Ventas
+todavía no requiere una variable de entorno porque conserva su implementación
+provisional en memoria.

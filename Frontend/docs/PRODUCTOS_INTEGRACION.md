@@ -1,46 +1,86 @@
-# Integración futura de Productos
+# Integración real de Productos
 
 ## Estado actual
 
-El módulo Productos funciona con datos mock para demostrar la interfaz mientras
-`Microservicio Productos/` no tenga una implementación ni un contrato definido.
-El modelo provisional contiene `id`, `nombre`, `descripcion`, `precio`, `stock`,
-`categoria` y `activo`; estos campos no deben asumirse como definitivos.
+El frontend consume el contrato implementado por `Microservicio Productos/`.
+El catálogo mock y su almacenamiento temporal fueron eliminados.
 
-`ProductsPage` no conoce la ubicación de los mocks. Todas las lecturas y
-operaciones locales pasan por `src/services/productService.js`. La creación,
-edición y activación/inactivación modifican únicamente memoria y se pierden al
-recargar la aplicación.
+La URL del servicio se configura mediante:
 
-Las reglas de stock son exclusivamente visuales:
+```env
+VITE_PRODUCTS_API_URL=http://localhost:3002
+```
 
-- `0`: sin existencias.
-- `1` a `5`: stock bajo.
-- Más de `5`: disponible.
+El valor predeterminado coincide con el puerto `3002` definido por el backend.
+La ruta base utilizada por `productService.js` es `/api/productos`.
 
-La visibilidad de crear y editar para el rol `admin` también es provisional. El
-backend futuro deberá validar los permisos; ocultar controles en la interfaz no
-es una medida de autorización.
+## Contrato HTTP verificado
 
-## Contrato necesario
+| Operación | Método y ruta | Respuesta exitosa |
+| --- | --- | --- |
+| Listar | `GET /api/productos` | Array de productos |
+| Consultar | `GET /api/productos/:id` | Producto directo |
+| Crear | `POST /api/productos` | `{ mensaje, producto }` |
+| Actualizar | `PUT /api/productos/:id` | `{ mensaje, producto }` |
+| Desactivar | `DELETE /api/productos/:id` | `{ mensaje, producto }` |
 
-Antes de conectar el backend, el equipo debe definir y versionar:
+`DELETE` realiza una baja lógica: establece `activo=false`. El registro no se
+elimina de PostgreSQL.
 
-1. URL, puerto y base path del servicio.
-2. Endpoint y método para listar productos.
-3. Endpoint, método y payload para crear productos.
-4. Endpoint, método y payload para editar productos.
-5. Estrategia de eliminación física, inactivación o baja lógica.
-6. Campos reales, tipos, obligatoriedad y validaciones.
-7. Representación de precio, moneda, stock y categorías.
-8. Estrategia de autenticación y formato del header requerido.
-9. Roles y permisos aplicados por el backend.
-10. Estructura de respuestas exitosas, paginación y errores.
+## Modelo de producto
 
-## Piezas que deberán cambiar
+Las respuestas completas contienen:
 
-La adaptación principal deberá realizarse en `src/services/productService.js`,
-reemplazando el almacén mock por solicitudes al contrato real. Después deberán
-ajustarse el modelo visual, las validaciones y la autorización de controles si
-los campos o permisos reales difieren. `ProductsPage` podrá conservar su flujo
-de carga, filtros, estados vacíos y manejo de errores.
+- `id`
+- `nombre`
+- `descripcion`
+- `precio`
+- `stock`
+- `categoria`
+- `activo`
+- `fecha_creacion`
+- `fecha_actualizacion`
+
+POST y PUT reciben exactamente `nombre`, `descripcion`, `precio`, `stock`,
+`categoria` y `activo`. El formulario exige nombre y categoría, precio mayor o
+igual a cero y stock entero mayor o igual a cero.
+
+## Adaptación del frontend
+
+`src/services/productService.js` centraliza todas las solicitudes con `fetch` y
+expone:
+
+- `getProducts()`
+- `getAvailableProducts()`
+- `getProductById()`
+- `createProduct()`
+- `updateProduct()`
+- `deactivateProduct()`
+
+El servicio normaliza las diferencias entre respuestas para entregar siempre
+productos completos a la interfaz. Como DELETE solo devuelve `id`, `nombre` y
+`activo`, después de desactivar se consulta el producto por ID para recuperar
+el modelo completo actualizado.
+
+`getAvailableProducts()` filtra el listado real y devuelve únicamente registros
+con `activo=true` y `stock>0`. Esta función es la fuente de productos de
+`SalesPage`. `HomePage` obtiene del mismo servicio la métrica total del catálogo.
+
+## Errores
+
+El backend responde errores JSON con `{ mensaje }` y utiliza:
+
+- `400` para campos obligatorios ausentes o valores negativos.
+- `404` cuando el ID no existe.
+- `500` para errores de consulta o del servidor.
+
+El frontend conserva el mensaje del backend cuando existe y también distingue
+errores de red, JSON inválido, identificadores inválidos y estructuras de
+respuesta inesperadas mediante `ProductServiceError`.
+
+## CORS y autorización
+
+El backend utiliza `cors()` sin restricciones adicionales y actualmente no
+valida JWT ni roles. La visibilidad de las acciones administrativas en el
+frontend se conserva como comportamiento visual, pero no constituye una medida
+de autorización. El backend todavía no aplica controles de acceso.

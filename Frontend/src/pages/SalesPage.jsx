@@ -26,8 +26,12 @@ function SalesPage() {
     try {
       const availableProducts = await getAvailableProducts()
       setProducts(availableProducts)
-    } catch {
-      setLoadError('No fue posible cargar los productos disponibles de demostración.')
+    } catch (error) {
+      setLoadError(
+        error instanceof Error
+          ? error.message
+          : 'No fue posible cargar los productos disponibles.',
+      )
     } finally {
       setIsLoading(false)
     }
@@ -40,9 +44,13 @@ function SalesPage() {
       .then((availableProducts) => {
         if (isCurrent) setProducts(availableProducts)
       })
-      .catch(() => {
+      .catch((error) => {
         if (isCurrent) {
-          setLoadError('No fue posible cargar los productos disponibles de demostración.')
+          setLoadError(
+            error instanceof Error
+              ? error.message
+              : 'No fue posible cargar los productos disponibles.',
+          )
         }
       })
       .finally(() => {
@@ -262,7 +270,7 @@ function SalesPage() {
             <div className="sale-load-state" aria-live="polite" aria-busy="true">
               <span className="sale-load-state__spinner" aria-hidden="true" />
               <strong>Cargando productos</strong>
-              <p>Consultando el catálogo provisional…</p>
+              <p>Consultando productos activos con existencias…</p>
             </div>
           )}
 

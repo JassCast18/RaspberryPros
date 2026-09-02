@@ -5,6 +5,7 @@ import ProductList from '../components/products/ProductList.jsx'
 import useAuth from '../context/useAuth.js'
 import {
   createProduct,
+  deactivateProduct,
   getProducts,
   updateProduct,
 } from '../services/productService.js'
@@ -20,6 +21,8 @@ function ProductsPage() {
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [deactivatingProductId, setDeactivatingProductId] = useState(null)
+  const [actionError, setActionError] = useState('')
 
   const isAdmin = Array.isArray(user?.roles) && user.roles.includes('admin')
 
@@ -30,8 +33,12 @@ function ProductsPage() {
     try {
       const productList = await getProducts()
       setProducts(productList)
-    } catch {
-      setLoadError('No fue posible cargar los productos de demostración.')
+    } catch (error) {
+      setLoadError(
+        error instanceof Error
+          ? error.message
+          : 'No fue posible cargar los productos.',
+      )
     } finally {
       setIsLoading(false)
     }
@@ -44,9 +51,13 @@ function ProductsPage() {
       .then((productList) => {
         if (isCurrent) setProducts(productList)
       })
-      .catch(() => {
+      .catch((error) => {
         if (isCurrent) {
-          setLoadError('No fue posible cargar los productos de demostración.')
+          setLoadError(
+            error instanceof Error
+              ? error.message
+              : 'No fue posible cargar los productos.',
+          )
         }
       })
       .finally(() => {
@@ -87,12 +98,14 @@ function ProductsPage() {
   const openNewProduct = () => {
     setSelectedProduct(null)
     setSaveError('')
+    setActionError('')
     setIsModalOpen(true)
   }
 
   const openEditProduct = (product) => {
     setSelectedProduct(product)
     setSaveError('')
+    setActionError('')
     setIsModalOpen(true)
   }
 
@@ -119,10 +132,41 @@ function ProductsPage() {
       setSaveError(
         error instanceof Error
           ? error.message
-          : 'No fue posible guardar el producto de demostración.',
+          : 'No fue posible guardar el producto.',
       )
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const handleDeactivateProduct = async (product) => {
+    if (!product.activo || deactivatingProductId !== null) return
+
+    const confirmed = window.confirm(
+      `¿Desactivar producto "${product.nombre}"? Dejará de estar disponible para nuevas ventas.`,
+    )
+    if (!confirmed) return
+
+    setDeactivatingProductId(product.id)
+    setActionError('')
+
+    try {
+      const deactivatedProduct = await deactivateProduct(product.id)
+      setProducts((currentProducts) =>
+        currentProducts.map((currentProduct) =>
+          currentProduct.id === deactivatedProduct.id
+            ? deactivatedProduct
+            : currentProduct,
+        ),
+      )
+    } catch (error) {
+      setActionError(
+        error instanceof Error
+          ? error.message
+          : 'No fue posible desactivar el producto.',
+      )
+    } finally {
+      setDeactivatingProductId(null)
     }
   }
 
@@ -137,7 +181,7 @@ function ProductsPage() {
         <PageHeader
           eyebrow="Inventario"
           title="Productos"
-          description="Consulta y administra el catálogo provisional de productos."
+          description="Consulta y administra el catálogo de productos."
         />
 
         {isAdmin && (
@@ -149,14 +193,6 @@ function ProductsPage() {
           </button>
         )}
       </div>
-
-      <aside className="mock-notice" aria-label="Información sobre los datos">
-        <span aria-hidden="true">M</span>
-        <p>
-          <strong>Datos de demostración.</strong> Los cambios son locales y se restauran al
-          recargar la aplicación.
-        </p>
-      </aside>
 
       <section className="products-panel" aria-labelledby="products-list-title">
         <h2 className="visually-hidden" id="products-list-title">
@@ -203,14 +239,20 @@ function ProductsPage() {
             <strong>{filteredProducts.length}</strong>{' '}
             {filteredProducts.length === 1 ? 'producto encontrado' : 'productos encontrados'}
           </p>
-          <span>Modelo mock provisional</span>
+          <span>Microservicio Productos</span>
         </div>
+
+        {actionError && (
+          <p className="products-action-error" role="alert">
+            {actionError}
+          </p>
+        )}
 
         {isLoading && (
           <div className="products-state" aria-live="polite" aria-busy="true">
             <span className="products-state__spinner" aria-hidden="true" />
             <h3>Cargando productos</h3>
-            <p>Preparando el catálogo de demostración…</p>
+            <p>Consultando el catálogo…</p>
           </div>
         )}
 
@@ -235,7 +277,13 @@ function ProductsPage() {
         )}
 
         {!isLoading && !loadError && filteredProducts.length > 0 && (
-          <ProductList products={filteredProducts} isAdmin={isAdmin} onEdit={openEditProduct} />
+          <ProductList
+            products={filteredProducts}
+            isAdmin={isAdmin}
+            deactivatingProductId={deactivatingProductId}
+            onEdit={openEditProduct}
+            onDeactivate={handleDeactivateProduct}
+          />
         )}
       </section>
 

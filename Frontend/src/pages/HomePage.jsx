@@ -78,7 +78,7 @@ function HomePage() {
       value: productValue,
       detail:
         productMetric.status === 'loading'
-          ? 'Consultando catálogo provisional…'
+          ? 'Consultando catálogo de productos…'
           : productMetric.status === 'error'
             ? 'No fue posible consultar los productos'
             : `${productMetric.value} ${productMetric.value === 1 ? 'producto registrado' : 'productos registrados'} en el catálogo`,

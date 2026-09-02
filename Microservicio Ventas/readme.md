@@ -16,11 +16,13 @@ http://localhost:3003
 
 ## Variables de entorno
 
-Copiar `.env.example` a `.env` y ajustar credenciales:
+Copiar `.env.example` a `.env` y reemplazar localmente la contrasena de
+PostgreSQL de ejemplo. El archivo `.env` contiene configuracion local y no debe
+subirse al repositorio.
 
 ```text
 PORT=3003
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/ventas_db
+DATABASE_URL=postgresql://postgres:tu_contrasena@localhost:5432/ventas_db
 AUTH_API_URL=http://localhost:3001
 PRODUCTS_API_URL=http://localhost:3002
 UPSTREAM_TIMEOUT_MS=5000

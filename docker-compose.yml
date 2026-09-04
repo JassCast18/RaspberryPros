@@ -1,0 +1,164 @@
+# =============================================================================
+# RaspberryPros - Orquestacion completa con Docker Compose
+# -----------------------------------------------------------------------------
+# 5 contenedores en una sola red privada:
+#
+#   postgres   :5432  -> auth_db, productos_db, ventas_db
+#   usuarios   :3001  -> autenticacion (JWT) y usuarios
+#   productos  :3002  -> catalogo de productos
+#   ventas     :3003  -> ventas (consume usuarios y productos)
+#   frontend   :80    -> React servido por Nginx + reverse proxy de las APIs
+#
+# Solo el frontend publica un puerto hacia la red de la casa. Las APIs y la
+# base de datos quedan dentro de la red interna de Docker.
+#
+# Uso:
+#   cp .env.example .env      (y editar las contrasenas)
+#   docker compose up -d --build
+#   docker compose ps
+#   docker compose logs -f ventas
+#   docker compose down       (down -v tambien borra los datos)
+# =============================================================================
+
+name: raspberrypros
+
+services:
+  # ---------------------------------------------------------------------------
+  # Base de datos compartida (una instancia, tres bases separadas)
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: rp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en el archivo .env}
+      POSTGRES_DB: postgres
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
+      TZ: ${TZ:-America/Guatemala}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Se ejecuta solo la primera vez, con el volumen vacio.
+      - ./Database/docker/00-init-databases.sh:/docker-entrypoint-initdb.d/00-init-databases.sh:ro
+      - ./Database:/sql/database:ro
+      - ./Microservicio Productos/sql:/sql/productos:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - rp-net
+    # Descomentar solo si se quiere conectar pgAdmin o DBeaver desde otra maquina.
+    # ports:
+    #   - "5432:5432"
+
+  # ---------------------------------------------------------------------------
+  # Microservicio Usuarios / Autenticacion
+  # ---------------------------------------------------------------------------
+  usuarios:
+    build:
+      context: ./Microservicio Usuarios
+      dockerfile: Dockerfile
+    image: raspberrypros/usuarios:1.0.0
+    container_name: rp-usuarios
+    restart: unless-stopped
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/auth_db
+      JWT_SECRET: ${JWT_SECRET:?Falta JWT_SECRET en el archivo .env}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      BCRYPT_SALT_ROUNDS: ${BCRYPT_SALT_ROUNDS:-12}
+      TZ: ${TZ:-America/Guatemala}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - rp-net
+
+  # ---------------------------------------------------------------------------
+  # Microservicio Productos
+  # ---------------------------------------------------------------------------
+  productos:
+    build:
+      context: ./Microservicio Productos
+      dockerfile: Dockerfile
+    image: raspberrypros/productos:1.0.0
+    container_name: rp-productos
+    restart: unless-stopped
+    environment:
+      PORT: 3002
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: productos_db
+      TZ: ${TZ:-America/Guatemala}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - rp-net
+
+  # ---------------------------------------------------------------------------
+  # Microservicio Ventas (depende de los otros dos)
+  # ---------------------------------------------------------------------------
+  ventas:
+    build:
+      context: ./Microservicio Ventas
+      dockerfile: Dockerfile
+    image: raspberrypros/ventas:1.0.0
+    container_name: rp-ventas
+    restart: unless-stopped
+    environment:
+      PORT: 3003
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/ventas_db
+      AUTH_API_URL: http://usuarios:3001
+      PRODUCTS_API_URL: http://productos:3002
+      UPSTREAM_TIMEOUT_MS: ${UPSTREAM_TIMEOUT_MS:-5000}
+      TZ: ${TZ:-America/Guatemala}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      usuarios:
+        condition: service_healthy
+      productos:
+        condition: service_healthy
+    networks:
+      - rp-net
+
+  # ---------------------------------------------------------------------------
+  # Frontend (React compilado + Nginx haciendo de reverse proxy)
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_AUTH_API_PROXY_PATH: /usuarios-api
+        VITE_SALES_API_PROXY_PATH: /ventas-api
+        VITE_PRODUCTS_API_URL: /productos-api
+    image: raspberrypros/frontend:1.0.0
+    container_name: rp-frontend
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-America/Guatemala}
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    depends_on:
+      usuarios:
+        condition: service_healthy
+      productos:
+        condition: service_healthy
+      ventas:
+        condition: service_healthy
+    networks:
+      - rp-net
+
+networks:
+  rp-net:
+    driver: bridge
+
+volumes:
+  postgres_data:

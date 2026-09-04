@@ -1,0 +1,14 @@
+# Variables de entorno reales (nunca se suben al repositorio)
+.env
+.env.local
+.env.*.local
+
+# Dependencias y builds
+node_modules/
+dist/
+
+# Sistema operativo / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
